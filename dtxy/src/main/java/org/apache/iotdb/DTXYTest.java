@@ -17,7 +17,6 @@ public class DTXYTest {
     static SessionPool sessionPool = new SessionPool("127.0.0.1", 6667, "root", "root", 10);
 
     public static void main(String[] args) {
-
         for (int i = 0; i < 6; i++) {
             new Thread(new WriteThread(i)).start();
         }
@@ -51,11 +50,16 @@ public class DTXYTest {
             this.device = device;
         }
 
+        long totalTime = 0;
+
+        int count = 0;
+
         @Override
         public void run() {
             long time = 86400000;
             Random random = new Random();
             while (true) {
+                count++;
                 try {
                     Thread.sleep(500);
                 } catch (InterruptedException e) {
@@ -81,8 +85,14 @@ public class DTXYTest {
                 } catch (IoTDBConnectionException | StatementExecutionException e) {
                     e.printStackTrace();
                 }
-                System.out.println(
-                    Thread.currentThread().getName() + " write 50000 cost: " + (System.currentTimeMillis() - start));
+
+                totalTime += System.currentTimeMillis() - start;
+                if(count % 1000 == 0){
+                    System.out.println(
+                        Thread.currentThread().getName() + " write 50000 avg cost: " + totalTime / count);
+                    count = 0;
+                    totalTime = 0;
+                }
             }
         }
     }
@@ -96,11 +106,16 @@ public class DTXYTest {
             this.device = device;
         }
 
+        long totalTime = 0;
+
+        int count = 0;
+
         @Override
         public void run() {
             long time = 86400000000L;
             Random random = new Random();
             while (true) {
+                count++;
                 try {
                     Thread.sleep(5000);
                 } catch (InterruptedException e) {
@@ -154,14 +169,24 @@ public class DTXYTest {
                     }
                     tablet.reset();
                 }
-                System.out.println(
-                    Thread.currentThread().getName() + " write 500000 future point cost: " + (System.currentTimeMillis() - start) + "to s" + index);
+
+                totalTime += System.currentTimeMillis() - start;
+                if(count % 1000 == 0){
+                    System.out.println(
+                        Thread.currentThread().getName() + " write 500000 future points avg cost: " + totalTime / count);
+                    count = 0;
+                    totalTime = 0;
+                }
             }
         }
     }
 
     static class ReadLastThread implements Runnable {
         int device;
+
+        long totalTime = 0;
+
+        int count = 0;
 
         ReadLastThread(int device) {
             this.device = device;
@@ -190,7 +215,15 @@ public class DTXYTest {
                         a++;
                         dataSet.next();
                     }
-                    System.out.println(Thread.currentThread().getName() + " last query: " + a + " cost: " + (System.currentTimeMillis() - start));
+
+                    totalTime += System.currentTimeMillis() - start;
+                    if(count % 1000 == 0){
+                        System.out.println(
+                            Thread.currentThread().getName() + " last query avg cost: " + totalTime / count);
+                        count = 0;
+                        totalTime = 0;
+                    }
+
                     sessionPool.closeResultSet(dataSet);
                 }
             } catch (Exception e) {
@@ -202,6 +235,10 @@ public class DTXYTest {
 
     static class ReadRawDataThread implements Runnable {
         int device;
+
+        long totalTime = 0;
+
+        int count = 0;
 
         ReadRawDataThread(int device) {
             this.device = device;
@@ -230,7 +267,15 @@ public class DTXYTest {
                         a++;
                         dataSet.next();
                     }
-                    System.out.println(Thread.currentThread().getName() + " raw data query: " + a + " cost: " + (System.currentTimeMillis() - start));
+
+                    totalTime += System.currentTimeMillis() - start;
+                    if(count % 1000 == 0){
+                        System.out.println(
+                            Thread.currentThread().getName() + " raw data query avg cost: " + totalTime / count);
+                        count = 0;
+                        totalTime = 0;
+                    }
+
                     sessionPool.closeResultSet(dataSet);
                 }
             } catch (Exception e) {
@@ -242,6 +287,10 @@ public class DTXYTest {
 
     static class ReadGroupByThread implements Runnable {
         int device;
+
+        long totalTime = 0;
+
+        int count = 0;
 
         ReadGroupByThread(int device) {
             this.device = device;
@@ -272,7 +321,15 @@ public class DTXYTest {
                         a++;
                         dataSet.next();
                     }
-                    System.out.println(Thread.currentThread().getName() + " down sampling query:  " + a + " cost: " + (System.currentTimeMillis() - start));
+
+                    totalTime += System.currentTimeMillis() - start;
+                    if(count % 1000 == 0){
+                        System.out.println(
+                            Thread.currentThread().getName() + " down sampling query avg cost: " + totalTime / count);
+                        count = 0;
+                        totalTime = 0;
+                    }
+
                     sessionPool.closeResultSet(dataSet);
                 }
             } catch (Exception e) {

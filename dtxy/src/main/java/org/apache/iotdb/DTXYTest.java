@@ -14,9 +14,15 @@ import org.apache.iotdb.tsfile.write.schema.MeasurementSchema;
 
 public class DTXYTest {
 
-    static SessionPool sessionPool = new SessionPool("127.0.0.1", 6667, "root", "root", 10);
+    static SessionPool sessionPool;
 
+    /**
+     * main function
+     * @param args [iotdb_ip_address, iotdb_port, iotdb_username, iotdb_password, session_pool_size]
+     */
     public static void main(String[] args) {
+        sessionPool = new SessionPool(args[0], Integer.parseInt(args[1]), args[2], args[3], Integer.parseInt(args[4]));
+
         for (int i = 0; i < 6; i++) {
             new Thread(new WriteThread(i)).start();
         }
@@ -89,7 +95,7 @@ public class DTXYTest {
                 totalTime += System.currentTimeMillis() - start;
                 if(count % 1000 == 0){
                     System.out.println(
-                        Thread.currentThread().getName() + " write 50000 avg cost: " + totalTime / count);
+                        Thread.currentThread().getName() + " write 50000 current points avg cost: " + (totalTime / count) + "ms");
                     count = 0;
                     totalTime = 0;
                 }
@@ -173,7 +179,7 @@ public class DTXYTest {
                 totalTime += System.currentTimeMillis() - start;
                 if(count % 1000 == 0){
                     System.out.println(
-                        Thread.currentThread().getName() + " write 500000 future points avg cost: " + totalTime / count);
+                        Thread.currentThread().getName() + " write 500000 history points avg cost: " + (totalTime / count) + "ms");
                     count = 0;
                     totalTime = 0;
                 }
@@ -219,7 +225,7 @@ public class DTXYTest {
                     totalTime += System.currentTimeMillis() - start;
                     if(count % 1000 == 0){
                         System.out.println(
-                            Thread.currentThread().getName() + " last query avg cost: " + totalTime / count);
+                            Thread.currentThread().getName() + " last query avg cost: " + (totalTime / count) + "ms");
                         count = 0;
                         totalTime = 0;
                     }
@@ -252,7 +258,7 @@ public class DTXYTest {
             long time = 86400000;
             try {
                 while (true) {
-                    Thread.sleep(5000);
+                    Thread.sleep(20000);
                     long start = System.currentTimeMillis();
 
                     StringBuilder builder = new StringBuilder("select ");
@@ -271,7 +277,7 @@ public class DTXYTest {
                     totalTime += System.currentTimeMillis() - start;
                     if(count % 1000 == 0){
                         System.out.println(
-                            Thread.currentThread().getName() + " raw data query avg cost: " + totalTime / count);
+                            Thread.currentThread().getName() + " raw data query avg cost: " + (totalTime / count) + "ms");
                         count = 0;
                         totalTime = 0;
                     }
@@ -304,7 +310,7 @@ public class DTXYTest {
             long time = 86400000;
             try {
                 while (true) {
-                    Thread.sleep(5000);
+                    Thread.sleep(20000);
                     long start = System.currentTimeMillis();
 
                     time += 5000;
@@ -325,7 +331,7 @@ public class DTXYTest {
                     totalTime += System.currentTimeMillis() - start;
                     if(count % 1000 == 0){
                         System.out.println(
-                            Thread.currentThread().getName() + " down sampling query avg cost: " + totalTime / count);
+                            Thread.currentThread().getName() + " down sampling query avg cost: " + (totalTime / count) + "ms");
                         count = 0;
                         totalTime = 0;
                     }

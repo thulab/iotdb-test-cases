@@ -1,6 +1,6 @@
 # iotdb-test-cases
 
-IoTDB 测试用例，包括模拟用户场景和自构造场景
+IoTDB 多测试场景。
 
 # 分支介绍
 
@@ -9,10 +9,10 @@ rel/0.x 与 IoTDB rel/0.x 版本对应
 
 # 模块介绍
 
-## longtest
+## correctiontest
 
-正确性长测，发版前运行
+正确性长测。
 
-## dtxy
+## masssensor
 
-大唐先一测试场景
+单设备30万传感器测试场景。

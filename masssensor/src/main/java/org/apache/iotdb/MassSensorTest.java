@@ -25,7 +25,7 @@ public class MassSensorTest {
      */
     public static void main(String[] args) {
         if (args == null || args.length == 0) {
-            args = new String[]{"192.168.130.6", "6667", "root", "root", "20"};
+            args = new String[]{"192.168.130.6", "6667", "root", "root", "50"};
         }
         sessionPool = new SessionPool(args[0], Integer.parseInt(args[1]), args[2], args[3], Integer.parseInt(args[4]));
 

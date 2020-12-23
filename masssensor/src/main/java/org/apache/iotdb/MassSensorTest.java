@@ -25,7 +25,7 @@ public class MassSensorTest {
      */
     public static void main(String[] args) {
         if (args == null || args.length == 0) {
-            args = new String[]{"127.0.0.1", "6667", "root", "root", "12"};
+            args = new String[]{"192.168.130.6", "6667", "root", "root", "20"};
         }
         sessionPool = new SessionPool(args[0], Integer.parseInt(args[1]), args[2], args[3], Integer.parseInt(args[4]));
 
@@ -89,7 +89,7 @@ public class MassSensorTest {
 
                 List<String> values = new ArrayList<>();
                 for (int i = 0; i < 50000; i++) {
-                    values.add(random.nextInt()+"");
+                    values.add(random.nextFloat()+"");
                 }
 
                 try {
@@ -150,7 +150,7 @@ public class MassSensorTest {
                 schemaList.add(new MeasurementSchema("s" + (index+9), TSDataType.FLOAT, TSEncoding.RLE));
 
 
-                Tablet tablet = new Tablet("root.sg1.d1", schemaList, 50000);
+                Tablet tablet = new Tablet("root.sg1.d1", schemaList, 1000);
 
                 long[] timestamps = tablet.timestamps;
                 Object[] values = tablet.values;

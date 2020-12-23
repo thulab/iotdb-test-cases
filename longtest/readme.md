@@ -7,7 +7,7 @@ mvn clean package
 ### run this test in target
 
 ```
-java - jar correctionTest-1.0-SNAPSHOT-jar-with-dependencies.jar
+java - jar longtest-0.12.0-SNAPSHOT-jar-with-dependencies.jar
 ```
 
 ### change some params
@@ -15,13 +15,13 @@ java - jar correctionTest-1.0-SNAPSHOT-jar-with-dependencies.jar
 you can get more details by running
 
 ```
-java - jar correctionTest-1.0-SNAPSHOT-jar-with-dependencies.jar -help
+java - jar longtest-0.12.0-SNAPSHOT-jar-with-dependencies.jar -help
 ```
 
 for example, you can change host, port, etc
 
 ```
-java -jar jar correctionTest-1.0-SNAPSHOT-jar-with-dependencies.jar -h localhost -p 6667
+java -jar jar longtest-0.12.0-SNAPSHOT-jar-with-dependencies.jar -h localhost -p 6667
 ```
 
 in default mode

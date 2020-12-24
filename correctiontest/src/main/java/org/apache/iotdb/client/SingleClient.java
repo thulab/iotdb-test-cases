@@ -533,7 +533,9 @@ public class SingleClient {
   }
 
   /**
-   * @return it will give count group by data query sql . like select count(s7) from root.sg1.d7 group by ((59313,60313],100)
+   * @param isSingleDevice whether it is a single device. for example, sql `select last_value(s1), last_value(s7) from root.sg10.d1` is a single device.
+   * @param isSingleSensor whether it is a single sensor. for example, sql `select last_value(s7) from root.sg10.d1,root.sg10.d2` is a single sensor.
+   * @return it will give count data query sql all time. like select last_value(s7) from root.sg2.d10
    */
   public String generateLastValueAggregatedQuerySqlAllTime(boolean isSingleDevice,
       boolean isSingleSensor) {
@@ -578,7 +580,7 @@ public class SingleClient {
   }
 
   /**
-   * @return it will give last_value group by data query sql . like select last_value(s7) from root.sg1.d7 group by ((59313,60313],100)
+   * @return it will give last_value group by data query sql. like select last_value(s7) from root.sg1.d7 group by ((59313,60313],100)
    */
   public String generateLastValueGroupByQuerySql(boolean isSingleDevice, boolean isSingleSensor, int count) {
     StringBuilder sql = new StringBuilder("select ");
@@ -635,6 +637,9 @@ public class SingleClient {
     return sql.toString();
   }
 
+  /**
+   * @return it will give count group by data query sql . like select count(s7) from root.sg1.d7 group by ((59313,60313],100)
+   */
   public String generateCountGroupByQuerySql(boolean isSingleDevice, boolean isSingleSensor, int count) {
     StringBuilder sql = new StringBuilder("select ");
     switch (config.getINSERT_MODE()) {

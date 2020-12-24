@@ -129,6 +129,9 @@ public class SingleClient {
         checkAggregatedData((1 + count) * config.getMaxRowNumber(), dataSet, sql);
         sql = generateCountGroupByQuerySql(true, true, count);
         checkAggregatedData(100, dataSet, sql);
+        sql = generateLastValueGroupByQuerySql(true, true, count);
+        checkLastValueAggregatedData(dataSet, sql);
+
         if(isCorrect) {
           logger.info("Loop " + count + " result is correct");
         } else {
@@ -251,6 +254,38 @@ public class SingleClient {
           logger.error(dataSet.getColumnNames().get(i) + " of expected result is "  + expected +  ", but in fact " + fields.get(i).getLongV());
           isCorrect = false;
           break;
+        }
+      }
+      if(!isCorrect) {
+        break;
+      }
+    }
+  }
+
+  /**
+   * check whether aggregated data is correct
+   * @param dataSet dataSet
+   * @param sql sql will be executed
+   */
+  private void checkLastValueAggregatedData(SessionDataSet dataSet, String sql)
+      throws StatementExecutionException, IoTDBConnectionException {
+    int expected = randomN - 100;
+    while(dataSet.hasNext()) {
+      RowRecord record = dataSet.next();
+      List<Field> fields = record.getFields();
+      for (int i = 0; i < fields.size(); i++) {
+        if(fields.get(i).isNull()) {
+          logger.error("Results of sql: " + sql + " isn't correct");
+          logger.error(dataSet.getColumnNames().get(i) + " of expected result is " + expected + ", but in fact null");
+          isCorrect = false;
+          break;
+        } else if (fields.get(i).getLongV() != expected) {
+          logger.error("Results of sql: " + sql + " isn't correct");
+          logger.error(dataSet.getColumnNames().get(i) + " of expected result is "  + expected +  ", but in fact " + fields.get(i).getLongV());
+          isCorrect = false;
+          break;
+        } else {
+          expected -= 100;
         }
       }
       if(!isCorrect) {
@@ -615,12 +650,12 @@ public class SingleClient {
           sql.append(" ");
         }
         // pick a time point
-        int point =
+        randomN =
             random.nextInt(config.getMaxRowNumber()) + 1 + count * config.getMaxRowNumber();
-        if (point - 1000 < count * config.getMaxRowNumber()) {
-          point = count * config.getMaxRowNumber() + 1000;
+        if (randomN - 1000 < count * config.getMaxRowNumber()) {
+          randomN = count * config.getMaxRowNumber() + 1000;
         }
-        sql.append(" group by ((").append(point - 1000).append(",").append(point).append("]").append(",").append("100").append(")");
+        sql.append(" group by ((").append(randomN - 1000).append(",").append(randomN).append("]").append(",").append("100").append(")");
         break;
       case Constants.DELETION:
       case Constants.UNSEQUENCE:

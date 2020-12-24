@@ -18,7 +18,7 @@ import org.slf4j.LoggerFactory;
 
 public class SingleClient {
   private Session session;
-  private Config config = Config.getConfig();
+  private final Config config = Config.getConfig();
   private String randomDevice;
   private String randomSensor;
   private final Random random = new Random();
@@ -109,22 +109,22 @@ public class SingleClient {
         sql = generateLastValueAggregatedQuerySql(false, true, count);
         dataSet = session.executeQueryStatement(sql);
         checkAggregatedData(lastTimePoint, dataSet, sql);
-        sql = generateCountAggregatedQuerySqlAllTime(true, true, count);
+        sql = generateCountAggregatedQuerySqlAllTime(true, true);
         dataSet = session.executeQueryStatement(sql);
         checkAggregatedData((1 + count) * config.getMaxRowNumber(), dataSet, sql);
-        sql = generateCountAggregatedQuerySqlAllTime(true, false, count);
+        sql = generateCountAggregatedQuerySqlAllTime(true, false);
         dataSet = session.executeQueryStatement(sql);
         checkAggregatedData((1 + count) * config.getMaxRowNumber(), dataSet, sql);
-        sql = generateCountAggregatedQuerySqlAllTime(false, true, count);
+        sql = generateCountAggregatedQuerySqlAllTime(false, true);
         dataSet = session.executeQueryStatement(sql);
         checkAggregatedData((1 + count) * config.getMaxRowNumber(), dataSet, sql);
-        sql = generateLastValueAggregatedQuerySqlAllTime(true, true, count);
+        sql = generateLastValueAggregatedQuerySqlAllTime(true, true);
         dataSet = session.executeQueryStatement(sql);
         checkAggregatedData((1 + count) * config.getMaxRowNumber(), dataSet, sql);
-        sql = generateLastValueAggregatedQuerySqlAllTime(true, false, count);
+        sql = generateLastValueAggregatedQuerySqlAllTime(true, false);
         dataSet = session.executeQueryStatement(sql);
         checkAggregatedData((1 + count) * config.getMaxRowNumber(), dataSet, sql);
-        sql = generateLastValueAggregatedQuerySqlAllTime(false, true, count);
+        sql = generateLastValueAggregatedQuerySqlAllTime(false, true);
         dataSet = session.executeQueryStatement(sql);
         checkAggregatedData((1 + count) * config.getMaxRowNumber(), dataSet, sql);
         sql = generateCountGroupByQuerySql(true, true, count);
@@ -200,6 +200,11 @@ public class SingleClient {
     }
   }
 
+  /**
+   * check whether raw data is correct
+   * @param dataSet dataSet
+   * @param sql sql will be executed
+   */
   private void checkRawData(SessionDataSet dataSet, String sql)
       throws StatementExecutionException, IoTDBConnectionException {
     while(dataSet.hasNext()) {
@@ -224,6 +229,12 @@ public class SingleClient {
     }
   }
 
+  /**
+   * check whether aggregated data is correct
+   * @param expected expected result
+   * @param dataSet dataSet
+   * @param sql sql will be executed
+   */
   private void checkAggregatedData(long expected, SessionDataSet dataSet, String sql)
       throws StatementExecutionException, IoTDBConnectionException {
     while(dataSet.hasNext()) {
@@ -248,7 +259,10 @@ public class SingleClient {
     }
   }
 
-
+  /**
+   * delete data, randomly choose a time interval of 1000 to delete.
+   * @param count loop count. Which loop it is in. for example, if you are in n loop count, you will choose time interval between 0 and n * maxRowNumber.
+   */
   private void deleteData(int count) throws StatementExecutionException, IoTDBConnectionException {
     randomN = random.nextInt(config.getMaxRowNumber()) + 1 + count * config.getMaxRowNumber();
     if(randomN - 1000 < count * config.getMaxRowNumber()) {
@@ -264,6 +278,10 @@ public class SingleClient {
     session.deleteData(paths, randomN - 999, randomN);
   }
 
+  /**
+   * insert data
+   * @param count loop count. Which loop it is in. for example, if you are in n loop count, you will choose time interval between 0 and n * maxRowNumber.
+   */
   private void insertUnsequenceData(int count) throws StatementExecutionException, IoTDBConnectionException {
     session.executeNonQueryStatement("flush");
     randomN = random.nextInt(config.getMaxRowNumber()) + 1 + count * config.getMaxRowNumber();
@@ -284,6 +302,12 @@ public class SingleClient {
     session.insertTablet(tablet);
   }
 
+  /**
+   * @param isSingleDevice whether it is a single device. for example, sql `select s1,s7 from root.sg10.d1 where time >= 15764 and time <= 16763` is a single device.
+   * @param isSingleSensor whether it is a single sensor. for example, sql `select s7 from root.sg10.d1,root.sg10.d2 where time >= 15988 and time <= 16987` is a single sensor.
+   * @param count loop count. Which loop it is in. for example, if you are in n loop count, you will choose time interval between 0 and n * maxRowNumber.
+   * @return it will give raw data query sql which randomly choose a time interval of 1000. like select s7 from root.sg2.d10 where time >= 15764 and time <= 16763
+   */
   public String generateRawDataQuerySql(boolean isSingleDevice, boolean isSingleSensor, int count) {
     StringBuilder sql = new StringBuilder("select ");
     switch (config.getINSERT_MODE()) {
@@ -339,6 +363,12 @@ public class SingleClient {
     return sql.toString();
   }
 
+  /**
+   * @param isSingleDevice whether it is a single device. for example, sql `select last_value(s1), last_value(s7) from root.sg10.d1 where time >= 15764 and time <= 16763` is a single device.
+   * @param isSingleSensor whether it is a single sensor. for example, sql `select last_value(s7) from root.sg10.d1,root.sg10.d2 where time >= 15988 and time <= 16987` is a single sensor.
+   * @param count loop count. Which loop it is in. for example, if you are in n loop count, you will choose time interval between 0 and n * maxRowNumber.
+   * @return it will give last_value data query sql which randomly choose a time interval of 1000. like select last_value(s7) from root.sg2.d10 where time >= 15764 and time <= 16763
+   */
   public String generateLastValueAggregatedQuerySql(boolean isSingleDevice, boolean isSingleSensor, int count) {
     StringBuilder sql = new StringBuilder("select ");
     switch (config.getINSERT_MODE()) {
@@ -394,6 +424,12 @@ public class SingleClient {
     return sql.toString();
   }
 
+  /**
+   * @param isSingleDevice whether it is a single device. for example, sql `select count(s1), count(s7) from root.sg10.d1 where time >= 15764 and time <= 16763` is a single device.
+   * @param isSingleSensor whether it is a single sensor. for example, sql `select count(s7) from root.sg10.d1,root.sg10.d2 where time >= 15988 and time <= 16987` is a single sensor.
+   * @param count loop count. Which loop it is in. for example, if you are in n loop count, you will choose time interval between 0 and n * maxRowNumber.
+   * @return it will give count data query sql which randomly choose a time interval of 1000. like select count(s7) from root.sg2.d10 where time >= 15764 and time <= 16763
+   */
   public String generateCountAggregatedQuerySql(boolean isSingleDevice, boolean isSingleSensor, int count) {
     StringBuilder sql = new StringBuilder("select ");
     switch (config.getINSERT_MODE()) {
@@ -449,7 +485,13 @@ public class SingleClient {
     return sql.toString();
   }
 
-  public String generateCountAggregatedQuerySqlAllTime(boolean isSingleDevice, boolean isSingleSensor, int count) {
+  /**
+   * @param isSingleDevice whether it is a single device. for example, sql `select count(s1), count(s7) from root.sg10.d1` is a single device.
+   * @param isSingleSensor whether it is a single sensor. for example, sql `select count(s7) from root.sg10.d1,root.sg10.d2` is a single sensor.
+   * @return it will give count data query sql all time. like select count(s7) from root.sg2.d10
+   */
+  public String generateCountAggregatedQuerySqlAllTime(boolean isSingleDevice,
+      boolean isSingleSensor) {
     StringBuilder sql = new StringBuilder("select ");
     switch (config.getINSERT_MODE()) {
       case Constants.SEQUENCE:
@@ -490,7 +532,13 @@ public class SingleClient {
     return sql.toString();
   }
 
-  public String generateLastValueAggregatedQuerySqlAllTime(boolean isSingleDevice, boolean isSingleSensor, int count) {
+  /**
+   * @param isSingleDevice whether it is a single device. for example, sql `select last_value(s1), last_value(s7) from root.sg10.d1` is a single device.
+   * @param isSingleSensor whether it is a single sensor. for example, sql `select last_value(s7) from root.sg10.d1,root.sg10.d2` is a single sensor.
+   * @return it will give count data query sql all time. like select last_value(s7) from root.sg2.d10
+   */
+  public String generateLastValueAggregatedQuerySqlAllTime(boolean isSingleDevice,
+      boolean isSingleSensor) {
     StringBuilder sql = new StringBuilder("select ");
     switch (config.getINSERT_MODE()) {
       case Constants.SEQUENCE:

@@ -17,6 +17,7 @@ import org.apache.iotdb.tsfile.write.schema.MeasurementSchema;
  */
 public class MassSensorTest {
 
+    public static final int REPORT_COUNE = 50;
     static SessionPool sessionPool;
 
     /**
@@ -99,7 +100,7 @@ public class MassSensorTest {
                 }
 
                 totalTime += System.currentTimeMillis() - start;
-                if(count % 1000 == 0){
+                if(count % 50 == 0){
                     System.out.println(
                         Thread.currentThread().getName() + " write 50000 current points avg cost: " + (totalTime / count) + "ms");
                     count = 0;
@@ -124,7 +125,7 @@ public class MassSensorTest {
 
         @Override
         public void run() {
-            long time = 86400000000L;
+            long time = 0;
             Random random = new Random();
             while (true) {
                 count++;
@@ -133,6 +134,9 @@ public class MassSensorTest {
                 } catch (InterruptedException e) {
                     e.printStackTrace();
                 }
+
+                time += 5000;
+
                 long start = System.currentTimeMillis();
 
                 int index = random.nextInt(250000);
@@ -157,8 +161,7 @@ public class MassSensorTest {
 
                 for (int num = 0; num < 50000; num++) {
                     int row = tablet.rowSize++;
-                    timestamps[row] = time;
-                    time += 5000;
+                    timestamps[row] = time + num;
                     for (int i = 0; i < 10; i++) {
                         float[] sensor = (float[]) values[i];
                         sensor[row] = random.nextFloat();
@@ -183,7 +186,7 @@ public class MassSensorTest {
                 }
 
                 totalTime += System.currentTimeMillis() - start;
-                if(count % 1000 == 0){
+                if(count % 50 == 0){
                     System.out.println(
                         Thread.currentThread().getName() + " write 500000 history points avg cost: " + (totalTime / count) + "ms");
                     count = 0;
@@ -230,7 +233,7 @@ public class MassSensorTest {
                     }
 
                     totalTime += System.currentTimeMillis() - start;
-                    if(count % 1000 == 0){
+                    if(count % 50 == 0){
                         System.out.println(
                             Thread.currentThread().getName() + " last query avg cost: " + (totalTime / count) + "ms");
                         count = 0;
@@ -283,7 +286,7 @@ public class MassSensorTest {
                     }
 
                     totalTime += System.currentTimeMillis() - start;
-                    if(count % 1000 == 0){
+                    if(count % REPORT_COUNE == 0){
                         System.out.println(
                             Thread.currentThread().getName() + " raw data query avg cost: " + (totalTime / count) + "ms");
                         count = 0;
@@ -338,7 +341,7 @@ public class MassSensorTest {
                     }
 
                     totalTime += System.currentTimeMillis() - start;
-                    if(count % 1000 == 0){
+                    if(count % 50 == 0){
                         System.out.println(
                             Thread.currentThread().getName() + " down sampling query avg cost: " + (totalTime / count) + "ms");
                         count = 0;
